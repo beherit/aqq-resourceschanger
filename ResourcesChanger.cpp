@@ -96,6 +96,52 @@ bool ChkThemeGlowing()
 }
 //---------------------------------------------------------------------------
 
+//Pobieranie SSID aktualnego polaczenia Wi-Fi
+UnicodeString GetNetworkSSID()
+{
+  HANDLE ClientHandle = NULL;
+  DWORD ReturnCode = 0;
+  DWORD ClientVersion = 2;
+  DWORD NegotiatedVersion = 0;
+
+  PWLAN_INTERFACE_INFO_LIST InterfaceList = NULL;
+  PWLAN_INTERFACE_INFO InterfaceInfo = NULL;
+  PWLAN_AVAILABLE_NETWORK_LIST NetworkList = NULL;
+  PWLAN_AVAILABLE_NETWORK NetworkInfo = NULL;
+
+  ReturnCode = WlanOpenHandle(ClientVersion, NULL, &NegotiatedVersion, &ClientHandle);
+  if(ReturnCode!=ERROR_SUCCESS) return "";
+  else
+  {
+	ReturnCode = WlanEnumInterfaces(ClientHandle, NULL, &InterfaceList);
+	if(ReturnCode!=ERROR_SUCCESS) return "";
+	else
+	{
+	  for(int InterfaceIdx=0; InterfaceIdx<InterfaceList->dwNumberOfItems; InterfaceIdx++)
+	  {
+		InterfaceInfo = (WLAN_INTERFACE_INFO*)&InterfaceList->InterfaceInfo[InterfaceIdx];
+		if(InterfaceInfo->isState==wlan_interface_state_connected)
+		{
+		  ReturnCode = WlanGetAvailableNetworkList(ClientHandle, &InterfaceInfo->InterfaceGuid, 0, NULL, &NetworkList);
+		  if(ReturnCode!=ERROR_SUCCESS) return "";
+		  else
+		  {
+			for(int NetworkIdx=0; NetworkIdx<NetworkList->dwNumberOfItems; NetworkIdx++)
+			{
+			  NetworkInfo = (WLAN_AVAILABLE_NETWORK *) &NetworkList->Network[NetworkIdx];
+			  if(NetworkInfo->dwFlags & WLAN_AVAILABLE_NETWORK_CONNECTED)
+			   return (UnicodeString)NetworkInfo->strProfileName;
+			}
+		  }
+		}
+	  }
+	}
+  }
+
+  return "";
+}
+//---------------------------------------------------------------------------
+
 //Hook na zaladowanie wszystkich modulow w AQQ
 int __stdcall OnModulesLoaded(WPARAM wParam, LPARAM lParam)
 {
