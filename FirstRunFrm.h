@@ -1,28 +1,26 @@
 //---------------------------------------------------------------------------
-
 #ifndef FirstRunFrmH
 #define FirstRunFrmH
 //---------------------------------------------------------------------------
-#include <Classes.hpp>
-#include <Controls.hpp>
-#include <StdCtrls.hpp>
-#include <Forms.hpp>
+#include "acPNG.hpp"
 #include "sBevel.hpp"
+#include "sButton.hpp"
+#include "sEdit.hpp"
+#include "sLabel.hpp"
+#include "sListView.hpp"
+#include "sPanel.hpp"
+#include "sRadioButton.hpp"
 #include "sSkinManager.hpp"
 #include "sSkinProvider.hpp"
-#include <ExtCtrls.hpp>
-#include "sPanel.hpp"
-#include "sButton.hpp"
-#include <ActnList.hpp>
-#include "acPNG.hpp"
-#include "sLabel.hpp"
-#include "sEdit.hpp"
 #include "sSpeedButton.hpp"
-#include <Buttons.hpp>
-#include "sRadioButton.hpp"
-#include "sCheckBox.hpp"
-#include "sListView.hpp"
-#include <ComCtrls.hpp>
+#include <System.Actions.hpp>
+#include <System.Classes.hpp>
+#include <Vcl.ActnList.hpp>
+#include <Vcl.Buttons.hpp>
+#include <Vcl.ComCtrls.hpp>
+#include <Vcl.Controls.hpp>
+#include <Vcl.ExtCtrls.hpp>
+#include <Vcl.StdCtrls.hpp>
 //---------------------------------------------------------------------------
 class TFirstRunForm : public TForm
 {

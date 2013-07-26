@@ -1,26 +1,25 @@
 //---------------------------------------------------------------------------
-
 #ifndef SettingsFrmH
 #define SettingsFrmH
 //---------------------------------------------------------------------------
-#include <Classes.hpp>
-#include <Controls.hpp>
-#include <StdCtrls.hpp>
-#include <Forms.hpp>
-#include "sSkinManager.hpp"
-#include "sSkinProvider.hpp"
 #include "sBevel.hpp"
 #include "sButton.hpp"
-#include <ActnList.hpp>
-#include <ExtCtrls.hpp>
 #include "sEdit.hpp"
 #include "sLabel.hpp"
+#include "sListView.hpp"
 #include "sPageControl.hpp"
 #include "sRadioButton.hpp"
-#include <ComCtrls.hpp>
-#include "sListView.hpp"
+#include "sSkinManager.hpp"
+#include "sSkinProvider.hpp"
 #include "sSpeedButton.hpp"
-#include <Buttons.hpp>
+#include <System.Actions.hpp>
+#include <System.Classes.hpp>
+#include <Vcl.ActnList.hpp>
+#include <Vcl.Buttons.hpp>
+#include <Vcl.ComCtrls.hpp>
+#include <Vcl.Controls.hpp>
+#include <Vcl.ExtCtrls.hpp>
+#include <Vcl.StdCtrls.hpp>
 //---------------------------------------------------------------------------
 class TSettingsForm : public TForm
 {

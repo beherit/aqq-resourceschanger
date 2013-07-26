@@ -4,18 +4,17 @@
 #include "FirstRunFrm.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
+#pragma link "acPNG"
 #pragma link "sBevel"
+#pragma link "sButton"
+#pragma link "sEdit"
+#pragma link "sLabel"
+#pragma link "sListView"
+#pragma link "sPanel"
+#pragma link "sRadioButton"
 #pragma link "sSkinManager"
 #pragma link "sSkinProvider"
-#pragma link "sPanel"
-#pragma link "sButton"
-#pragma link "acPNG"
-#pragma link "sLabel"
-#pragma link "sEdit"
 #pragma link "sSpeedButton"
-#pragma link "sRadioButton"
-#pragma link "sCheckBox"
-#pragma link "sListView"
 #pragma resource "*.dfm"
 TFirstRunForm *FirstRunForm;
 //---------------------------------------------------------------------------

@@ -1,15 +1,13 @@
-//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <windows.h>
 #pragma hdrstop
 #pragma argsused
-#include "Aqq.h"
+#include <PluginAPI.h>
 #include "FirstRunFrm.h"
 #include "NewComputerFrm.h"
 #include "SettingsFrm.h"
 #define RESOURCESCHANGER_SYSTEM_RESOURCECHANGED L"ResourcesChanger/System/ResourceChanged"
 #include <IdHashMessageDigest.hpp>
-//---------------------------------------------------------------------------
 
 int WINAPI DllEntryPoint(HINSTANCE hinst, unsigned long reason, void* lpReserved)
 {
@@ -186,7 +184,7 @@ int __stdcall ServiceNewComputer(WPARAM, LPARAM)
   //Ustawienie szerokosci formy
   hNewComputerForm->ClientWidth = 18 + hNewComputerForm->NewUserResourceNameLabel->Width + 18;
   //Pokazanie formy uzupelniania nazwy zasobu
-  hNewComputerForm->Show();  
+  hNewComputerForm->Show();
 
   return 0;
 }
@@ -259,9 +257,9 @@ void ChangeResources()
 //---------------------------------------------------------------------------
 
 //Zapisywanie zasobów
-bool SaveResourceToFile(char *FileName, char *res)
+bool SaveResourceToFile(wchar_t* FileName, wchar_t* Res)
 {
-  HRSRC hrsrc = FindResource(HInstance, res, RT_RCDATA);
+  HRSRC hrsrc = FindResource(HInstance, Res, RT_RCDATA);
   if(!hrsrc) return false;
   DWORD size = SizeofResource(HInstance, hrsrc);
   HGLOBAL hglob = LoadResource(HInstance, hrsrc);
@@ -275,11 +273,11 @@ bool SaveResourceToFile(char *FileName, char *res)
 //---------------------------------------------------------------------------
 
 //Obliczanie sumy kontrolnej pliku
-String __fastcall MD5File(const String FileName)
+UnicodeString MD5File(UnicodeString FileName)
 {
   if(FileExists(FileName))
   {
-    String Result;
+	UnicodeString Result;
     TFileStream *fs;
 
 	fs = new TFileStream(FileName, fmOpenRead | fmShareDenyWrite);
@@ -334,15 +332,15 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   if(!DirectoryExists(GetPluginUserDir()+"\\\\Shared"))
    CreateDir(GetPluginUserDir()+"\\\\Shared");
   if(!FileExists(GetPluginUserDir()+"\\\\Shared\\\\ResourcesChanger.dll.png"))
-   SaveResourceToFile((GetPluginUserDir()+"\\\\Shared\\\\ResourcesChanger.dll.png").t_str(),"PLUGIN_RES");
+   SaveResourceToFile((GetPluginUserDir()+"\\\\Shared\\\\ResourcesChanger.dll.png").w_str(),L"PLUGIN_RES");
   else if(MD5File(GetPluginUserDir()+"\\\\Shared\\\\ResourcesChanger.dll.png")!="55F8F054BC7D7A92BEA90ED00C8A50DA")
-   SaveResourceToFile((GetPluginUserDir()+"\\\\Shared\\\\ResourcesChanger.dll.png").t_str(),"PLUGIN_RES");
+   SaveResourceToFile((GetPluginUserDir()+"\\\\Shared\\\\ResourcesChanger.dll.png").w_str(),L"PLUGIN_RES");
   //Pobieranie zasobu glownego konta Jabber
   TPluginStateChange PluginStateChange;
   PluginLink.CallService(AQQ_FUNCTION_GETNETWORKSTATE,(WPARAM)(&PluginStateChange),0);
   DefaultResourceName = (wchar_t*)PluginStateChange.Resource;
   //Pobieranie nazwy komputera
-  char compName[256];
+  wchar_t compName[256];
   DWORD len = sizeof(compName);
   GetComputerNameEx(ComputerNameDnsHostname,compName,&len);
   ComputerName = compName;
@@ -420,7 +418,7 @@ extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVe
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"ResourcesChanger";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,0,0,0);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,1,0,0);
   PluginInfo.Description = L"Zmienia nazwê zasobu we wszystkich kontach Jabber zale¿nie od nazwy naszego komputera.";
   PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";

@@ -4,15 +4,15 @@
 #include "SettingsFrm.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
-#pragma link "sSkinManager"
-#pragma link "sSkinProvider"
 #pragma link "sBevel"
 #pragma link "sButton"
 #pragma link "sEdit"
 #pragma link "sLabel"
+#pragma link "sListView"
 #pragma link "sPageControl"
 #pragma link "sRadioButton"
-#pragma link "sListView"
+#pragma link "sSkinManager"
+#pragma link "sSkinProvider"
 #pragma link "sSpeedButton"
 #pragma resource "*.dfm"
 TSettingsForm *SettingsForm;
