@@ -1,21 +1,20 @@
 //---------------------------------------------------------------------------
-
 #ifndef NewComputerFrmH
 #define NewComputerFrmH
 //---------------------------------------------------------------------------
-#include <Classes.hpp>
-#include <Controls.hpp>
-#include <StdCtrls.hpp>
-#include <Forms.hpp>
 #include "sBevel.hpp"
 #include "sButton.hpp"
 #include "sEdit.hpp"
+#include "sLabel.hpp"
 #include "sPanel.hpp"
-#include <ExtCtrls.hpp>
 #include "sSkinManager.hpp"
 #include "sSkinProvider.hpp"
-#include "sLabel.hpp"
-#include <ActnList.hpp>
+#include <System.Actions.hpp>
+#include <System.Classes.hpp>
+#include <Vcl.ActnList.hpp>
+#include <Vcl.Controls.hpp>
+#include <Vcl.ExtCtrls.hpp>
+#include <Vcl.StdCtrls.hpp>
 //---------------------------------------------------------------------------
 class TNewComputerForm : public TForm
 {

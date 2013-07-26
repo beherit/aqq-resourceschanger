@@ -204,19 +204,14 @@ object SettingsForm: TSettingsForm
     Margins.Top = 6
     Margins.Right = 6
     Margins.Bottom = 6
-    ActivePage = ModeTabSheet
+    ActivePage = ResourcesListTabSheet
     Align = alClient
     TabOrder = 3
     SkinData.SkinSection = 'PAGECONTROL'
-    ExplicitHeight = 159
     object ModeTabSheet: TsTabSheet
       Caption = 'Tryb dzia'#322'ania'
       SkinData.CustomColor = False
       SkinData.CustomFont = False
-      ExplicitLeft = 0
-      ExplicitTop = 28
-      ExplicitWidth = 437
-      ExplicitHeight = 134
       object AdvancedModeLabel: TsLabel
         Left = 35
         Top = 74
@@ -265,8 +260,6 @@ object SettingsForm: TSettingsForm
       Caption = 'Lista zasob'#243'w'
       SkinData.CustomColor = False
       SkinData.CustomFont = False
-      ExplicitWidth = 320
-      ExplicitHeight = 134
       object DeleteItemSpeedButton: TsSpeedButton
         Left = 243
         Top = 96
@@ -470,6 +463,7 @@ object SettingsForm: TSettingsForm
   end
   object sSkinManager: TsSkinManager
     ExtendedBorders = True
+    IsDefault = False
     Active = False
     InternalSkins = <>
     MenuSupport.IcoLineSkin = 'ICOLINE'

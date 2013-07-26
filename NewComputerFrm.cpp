@@ -7,10 +7,10 @@
 #pragma link "sBevel"
 #pragma link "sButton"
 #pragma link "sEdit"
+#pragma link "sLabel"
 #pragma link "sPanel"
 #pragma link "sSkinManager"
 #pragma link "sSkinProvider"
-#pragma link "sLabel"
 #pragma resource "*.dfm"
 TNewComputerForm *NewComputerForm;
 //---------------------------------------------------------------------------
