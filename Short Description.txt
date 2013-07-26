@@ -1,0 +1,1 @@
+Wtyczka s³u¿y do zmiany nazwy zasobu we wszystkich kontach Jabber zale¿nie od nazwy naszego komputera. Od teraz nasi znajomi bêd¹ wiedzieæ, gdzie aktualnie mamy uruchomiony komunikator (np. w domu lub w pracy).
