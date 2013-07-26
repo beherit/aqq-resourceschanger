@@ -56,7 +56,7 @@ UnicodeString GetThemeSkinDir()
 }
 //---------------------------------------------------------------------------
 
-//Sprawdzanie czy wlaczona jest obsluga stylow obramowania okien
+//Sprawdzanie czy  wlaczona jest zaawansowana stylizacja okien
 bool ChkSkinEnabled()
 {
   TStrings* IniList = new TStringList();
@@ -70,17 +70,29 @@ bool ChkSkinEnabled()
 }
 //---------------------------------------------------------------------------
 
-//Sprawdzanie czy wlaczony jest natywny styl Windows
-bool ChkNativeEnabled()
+//Sprawdzanie ustawien animacji AlphaControls
+bool ChkThemeAnimateWindows()
 {
   TStrings* IniList = new TStringList();
   IniList->SetText((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0));
   TMemIniFile *Settings = new TMemIniFile(ChangeFileExt(Application->ExeName, ".INI"));
   Settings->SetStrings(IniList);
   delete IniList;
-  UnicodeString NativeEnabled = Settings->ReadString("Settings","Native","0");
+  UnicodeString AnimateWindowsEnabled = Settings->ReadString("Theme","ThemeAnimateWindows","1");
   delete Settings;
-  return StrToBool(NativeEnabled);
+  return StrToBool(AnimateWindowsEnabled);
+}
+//---------------------------------------------------------------------------
+bool ChkThemeGlowing()
+{
+  TStrings* IniList = new TStringList();
+  IniList->SetText((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_FETCHSETUP,0,0));
+  TMemIniFile *Settings = new TMemIniFile(ChangeFileExt(Application->ExeName, ".INI"));
+  Settings->SetStrings(IniList);
+  delete IniList;
+  UnicodeString GlowingEnabled = Settings->ReadString("Theme","ThemeGlowing","1");
+  delete Settings;
+  return StrToBool(GlowingEnabled);
 }
 //---------------------------------------------------------------------------
 
@@ -101,39 +113,53 @@ int __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam)
 {
   //Pobieranie sciezki nowej aktywnej kompozycji
   UnicodeString ThemeDir = StringReplace((wchar_t*)lParam, "\\", "\\\\", TReplaceFlags() << rfReplaceAll);
-  //Zmiana skorki wtyczki dla okna ustawien
+  //Okno ustawien zostalo juz stworzone
   if(hSettingsForm)
   {
-	//Wlaczenie skorkowania
-	if((FileExists(ThemeDir+"\\\\Skin\\\\Skin.asz"))&&(!ChkNativeEnabled()))
+	//Wlaczona zaawansowana stylizacja okien
+	if(ChkSkinEnabled())
 	{
-	  UnicodeString ThemeSkinDir = ThemeDir+"\\\\Skin";
-	  ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
-	  hSettingsForm->sSkinManager->SkinDirectory = ThemeSkinDir;
-	  hSettingsForm->sSkinManager->SkinName = "Skin.asz";
-	  hSettingsForm->sSkinProvider->DrawNonClientArea = ChkSkinEnabled();
-	  hSettingsForm->sSkinManager->Active = true;
+	  UnicodeString ThemeSkinDir = GetThemeSkinDir();
+	  //Plik zaawansowanej stylizacji okien istnieje
+	  if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
+	  {
+		ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
+		hSettingsForm->sSkinManager->SkinDirectory = ThemeSkinDir;
+		hSettingsForm->sSkinManager->SkinName = "Skin.asz";
+		if(ChkThemeAnimateWindows()) hSettingsForm->sSkinManager->AnimEffects->FormShow->Time = 200;
+		else hSettingsForm->sSkinManager->AnimEffects->FormShow->Time = 0;
+		hSettingsForm->sSkinManager->Effects->AllowGlowing = ChkThemeGlowing();
+		hSettingsForm->sSkinManager->Active = true;
+	  }
+	  //Brak pliku zaawansowanej stylizacji okien
+	  else hSettingsForm->sSkinManager->Active = false;
 	}
-	//Wylaczenie skorkowania
-	else
-	 hSettingsForm->sSkinManager->Active = false;
+	//Zaawansowana stylizacja okien wylaczona
+	else hSettingsForm->sSkinManager->Active = false;
   }
-  //Zmiana skorki wtyczki dla okna pierwszego uruchomienia wtyczki
+  //Okno pierwszego uruchomienia wtyczki zostalo juz stworzone
   if(hFirstRunForm)
   {
-	//Wlaczenie skorkowania
-	if((FileExists(ThemeDir+"\\\\Skin\\\\Skin.asz"))&&(!ChkNativeEnabled()))
+	//Wlaczona zaawansowana stylizacja okien
+	if(ChkSkinEnabled())
 	{
-	  UnicodeString ThemeSkinDir = ThemeDir+"\\\\Skin";
-	  ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
-	  hFirstRunForm->sSkinManager->SkinDirectory = ThemeSkinDir;
-	  hFirstRunForm->sSkinManager->SkinName = "Skin.asz";
-	  hFirstRunForm->sSkinProvider->DrawNonClientArea = ChkSkinEnabled();
-	  hFirstRunForm->sSkinManager->Active = true;
+	  UnicodeString ThemeSkinDir = GetThemeSkinDir();
+	  //Plik zaawansowanej stylizacji okien istnieje
+	  if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
+	  {
+		ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
+		hFirstRunForm->sSkinManager->SkinDirectory = ThemeSkinDir;
+		hFirstRunForm->sSkinManager->SkinName = "Skin.asz";
+		if(ChkThemeAnimateWindows()) hFirstRunForm->sSkinManager->AnimEffects->FormShow->Time = 200;
+		else hFirstRunForm->sSkinManager->AnimEffects->FormShow->Time = 0;
+		hFirstRunForm->sSkinManager->Effects->AllowGlowing = ChkThemeGlowing();
+		hFirstRunForm->sSkinManager->Active = true;
+	  }
+	  //Brak pliku zaawansowanej stylizacji okien
+	  else hFirstRunForm->sSkinManager->Active = false;
 	}
-	//Wylaczenie skorkowania
-	else
-	 hFirstRunForm->sSkinManager->Active = false;
+	//Zaawansowana stylizacja okien wylaczona
+	else hFirstRunForm->sSkinManager->Active = false;
 	//Skorkowanie poszczegolnych komponentow
 	if(hFirstRunForm->sSkinManager->Active)
 	{
@@ -148,22 +174,29 @@ int __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam)
 	  hFirstRunForm->WebWelcomeLabel->HoverFont->Color = clWindowText;
 	}
   }
-  //Zmiana skorki wtyczki dla okna uzupelniania nazwy zasobu
+  //Okno uzupelniania nazwy zasobu zostalo juz stworzone
   if(hNewComputerForm)
   {
-	//Wlaczenie skorkowania
-	if((FileExists(ThemeDir+"\\\\Skin\\\\Skin.asz"))&&(!ChkNativeEnabled()))
+	//Wlaczona zaawansowana stylizacja okien
+	if(ChkSkinEnabled())
 	{
-	  UnicodeString ThemeSkinDir = ThemeDir+"\\\\Skin";
-	  ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
-	  hNewComputerForm->sSkinManager->SkinDirectory = ThemeSkinDir;
-	  hNewComputerForm->sSkinManager->SkinName = "Skin.asz";
-	  hNewComputerForm->sSkinProvider->DrawNonClientArea = ChkSkinEnabled();
-	  hNewComputerForm->sSkinManager->Active = true;
+	  UnicodeString ThemeSkinDir = GetThemeSkinDir();
+	  //Plik zaawansowanej stylizacji okien istnieje
+	  if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
+	  {
+		ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
+		hNewComputerForm->sSkinManager->SkinDirectory = ThemeSkinDir;
+		hNewComputerForm->sSkinManager->SkinName = "Skin.asz";
+		if(ChkThemeAnimateWindows()) hNewComputerForm->sSkinManager->AnimEffects->FormShow->Time = 200;
+		else hNewComputerForm->sSkinManager->AnimEffects->FormShow->Time = 0;
+		hNewComputerForm->sSkinManager->Effects->AllowGlowing = ChkThemeGlowing();
+		hNewComputerForm->sSkinManager->Active = true;
+	  }
+	  //Brak pliku zaawansowanej stylizacji okien
+	  else hNewComputerForm->sSkinManager->Active = false;
 	}
-	//Wylaczenie skorkowania
-	else
-	 hNewComputerForm->sSkinManager->Active = false;
+	//Zaawansowana stylizacja okien wylaczona
+	else hNewComputerForm->sSkinManager->Active = false;
   }
 
   return 0;
@@ -257,18 +290,14 @@ void ChangeResources()
 //---------------------------------------------------------------------------
 
 //Zapisywanie zasobów
-bool SaveResourceToFile(wchar_t* FileName, wchar_t* Res)
+void ExtractRes(wchar_t* FileName, wchar_t* ResName, wchar_t* ResType)
 {
-  HRSRC hrsrc = FindResource(HInstance, Res, RT_RCDATA);
-  if(!hrsrc) return false;
-  DWORD size = SizeofResource(HInstance, hrsrc);
-  HGLOBAL hglob = LoadResource(HInstance, hrsrc);
-  LPVOID rdata = LockResource(hglob);
-  HANDLE hFile = CreateFile(FileName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-  DWORD writ;
-  WriteFile(hFile, rdata, size, &writ, NULL);
-  CloseHandle(hFile);
-  return true;
+  TPluginTwoFlagParams PluginTwoFlagParams;
+  PluginTwoFlagParams.cbSize = sizeof(TPluginTwoFlagParams);
+  PluginTwoFlagParams.Param1 = ResName;
+  PluginTwoFlagParams.Param2 = ResType;
+  PluginTwoFlagParams.Flag1 = (int)HInstance;
+  PluginLink.CallService(AQQ_FUNCTION_SAVERESOURCE,(WPARAM)&PluginTwoFlagParams,(LPARAM)FileName);
 }
 //---------------------------------------------------------------------------
 
@@ -332,9 +361,9 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   if(!DirectoryExists(GetPluginUserDir()+"\\\\Shared"))
    CreateDir(GetPluginUserDir()+"\\\\Shared");
   if(!FileExists(GetPluginUserDir()+"\\\\Shared\\\\ResourcesChanger.dll.png"))
-   SaveResourceToFile((GetPluginUserDir()+"\\\\Shared\\\\ResourcesChanger.dll.png").w_str(),L"PLUGIN_RES");
+   ExtractRes((GetPluginUserDir()+"\\\\Shared\\\\ResourcesChanger.dll.png").w_str(),L"SHARED",L"DATA");
   else if(MD5File(GetPluginUserDir()+"\\\\Shared\\\\ResourcesChanger.dll.png")!="55F8F054BC7D7A92BEA90ED00C8A50DA")
-   SaveResourceToFile((GetPluginUserDir()+"\\\\Shared\\\\ResourcesChanger.dll.png").w_str(),L"PLUGIN_RES");
+   ExtractRes((GetPluginUserDir()+"\\\\Shared\\\\ResourcesChanger.dll.png").w_str(),L"SHARED",L"DATA");
   //Pobieranie zasobu glownego konta Jabber
   TPluginStateChange PluginStateChange;
   PluginLink.CallService(AQQ_FUNCTION_GETNETWORKSTATE,(WPARAM)(&PluginStateChange),0);
@@ -414,11 +443,11 @@ extern "C" int __declspec(dllexport)__stdcall Settings()
 //---------------------------------------------------------------------------
 
 //Informacje o wtyczce
-extern "C" __declspec(dllexport) PPluginInfo __stdcall AQQPluginInfo(DWORD AQQVersion)
+extern "C" PPluginInfo __declspec(dllexport) __stdcall AQQPluginInfo(DWORD AQQVersion)
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"ResourcesChanger";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,1,0,0);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,2,0,0);
   PluginInfo.Description = L"Zmienia nazwê zasobu we wszystkich kontach Jabber zale¿nie od nazwy naszego komputera.";
   PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";

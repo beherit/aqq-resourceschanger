@@ -204,7 +204,7 @@ object SettingsForm: TSettingsForm
     Margins.Top = 6
     Margins.Right = 6
     Margins.Bottom = 6
-    ActivePage = ResourcesListTabSheet
+    ActivePage = ModeTabSheet
     Align = alClient
     TabOrder = 3
     SkinData.SkinSection = 'PAGECONTROL'
