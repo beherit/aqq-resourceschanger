@@ -150,7 +150,6 @@ object NewComputerForm: TNewComputerForm
   OldCreateOrder = False
   Position = poDesktopCenter
   OnCreate = FormCreate
-  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel: TsBevel
