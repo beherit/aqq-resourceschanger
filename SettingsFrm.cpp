@@ -1,7 +1,30 @@
 //---------------------------------------------------------------------------
+// Copyright (C) 2012-2013 Krzysztof Grochocki
+//
+// This file is part of ResourcesChanger
+//
+// ResourcesChanger is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3, or (at your option)
+// any later version.
+//
+// ResourcesChanger is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Radio; see the file COPYING. If not, write to
+// the Free Software Foundation, Inc., 51 Franklin Street,
+// Boston, MA 02110-1301, USA.
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
 #include <vcl.h>
 #pragma hdrstop
 #include "SettingsFrm.h"
+#include "ChuckNorrisFrm.h"
+#include "SetStateFrm.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma link "sBevel"
@@ -22,6 +45,8 @@ __declspec(dllimport)UnicodeString GetThemeSkinDir();
 __declspec(dllimport)bool ChkSkinEnabled();
 __declspec(dllimport)bool ChkThemeAnimateWindows();
 __declspec(dllimport)bool ChkThemeGlowing();
+__declspec(dllimport)int GetSaturation();
+__declspec(dllimport)int GetHUE();
 __declspec(dllimport)void LoadSettings();
 __declspec(dllimport)void ChangeResources();
 //---------------------------------------------------------------------------
@@ -35,12 +60,16 @@ __fastcall TSettingsForm::TSettingsForm(TComponent* Owner)
 void __fastcall TSettingsForm::WMTransparency(TMessage &Message)
 {
   Application->ProcessMessages();
-  sSkinProvider->BorderForm->UpdateExBordersPos(true,(int)Message.LParam);
+  if(sSkinManager->Active) sSkinProvider->BorderForm->UpdateExBordersPos(true,(int)Message.LParam);
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TSettingsForm::FormCreate(TObject *Sender)
 {
+  //Hack na blad w AC
+  #if defined(_WIN64)
+  ListView->SkinData->SkinSection = "";
+  #endif
   //Wlaczona zaawansowana stylizacja okien
   if(ChkSkinEnabled())
   {
@@ -48,12 +77,18 @@ void __fastcall TSettingsForm::FormCreate(TObject *Sender)
 	//Plik zaawansowanej stylizacji okien istnieje
 	if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
 	{
+	  //Dane pliku zaawansowanej stylizacji okien
 	  ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
 	  sSkinManager->SkinDirectory = ThemeSkinDir;
 	  sSkinManager->SkinName = "Skin.asz";
+	  //Ustawianie animacji AlphaControls
 	  if(ChkThemeAnimateWindows()) sSkinManager->AnimEffects->FormShow->Time = 200;
 	  else sSkinManager->AnimEffects->FormShow->Time = 0;
 	  sSkinManager->Effects->AllowGlowing = ChkThemeGlowing();
+	  //Zmiana kolorystyki AlphaControls
+	  sSkinManager->HueOffset = GetHUE();
+	  sSkinManager->Saturation = GetSaturation();
+	  //Aktywacja skorkowania AlphaControls
 	  sSkinManager->Active = true;
 	}
 	//Brak pliku zaawansowanej stylizacji okien
@@ -68,8 +103,6 @@ void __fastcall TSettingsForm::FormShow(TObject *Sender)
 {
   //Odczyt ustawien wtyczki
   aLoadSettings->Execute();
-  //Ustawianie zaleznosci opcji
-  AdvancedModeLabel->Visible = AdvancedModeRadioButton->Checked;
   //Wylaczanie przycisku zapisywania
   SaveButton->Enabled = false;
   //Ustawianie domyslnej karty
@@ -126,7 +159,6 @@ void __fastcall TSettingsForm::aSaveSettingsExecute(TObject *Sender)
 
 void __fastcall TSettingsForm::aResourcesListChkExecute(TObject *Sender)
 {
-  AdvancedModeLabel->Visible = AdvancedModeRadioButton->Checked;
   SaveButton->Enabled = true;
 }
 //---------------------------------------------------------------------------
@@ -164,7 +196,6 @@ void __fastcall TSettingsForm::EditSpeedButtonClick(TObject *Sender)
 	  SaveButton->Enabled = true;
 	}
   }
-
 }
 //---------------------------------------------------------------------------
 
@@ -234,5 +265,36 @@ void __fastcall TSettingsForm::OKButtonClick(TObject *Sender)
   //Wlaczanie przyciskow
   CancelButton->Enabled = true;
   OKButton->Enabled = true;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TSettingsForm::ChuckNorrisItemClick(TObject *Sender)
+{
+  ChuckNorrisForm = new TChuckNorrisForm(Application);
+  ChuckNorrisForm->SkinManagerEnabled = sSkinManager->Active;
+  ChuckNorrisForm->ComputerName = ListView->Items->Item[ListView->ItemIndex]->Caption;
+  ChuckNorrisForm->Caption = ChuckNorrisForm->Caption + " - " + ListView->Items->Item[ListView->ItemIndex]->Caption;
+  ChuckNorrisForm->ShowModal();
+  delete ChuckNorrisForm;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TSettingsForm::ChangeStateItemClick(TObject *Sender)
+{
+  SetStateForm = new TSetStateForm(Application);
+  SetStateForm->SkinManagerEnabled = sSkinManager->Active;
+  SetStateForm->ComputerName = ListView->Items->Item[ListView->ItemIndex]->Caption;
+  SetStateForm->Caption = SetStateForm->Caption + " - " + ListView->Items->Item[ListView->ItemIndex]->Caption;
+  SetStateForm->ShowModal();
+  delete SetStateForm;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TSettingsForm::PopupMenuPopup(TObject *Sender)
+{
+  TIniFile *Ini = new TIniFile(GetPluginUserDir()+"\\\\ResourcesChanger\\\\Settings.ini");
+  ChuckNorrisItem->Checked = Ini->SectionExists("SSID:"+ListView->Items->Item[ListView->ItemIndex]->Caption);
+  ChangeStateItem->Checked = Ini->SectionExists("State:"+ListView->Items->Item[ListView->ItemIndex]->Caption);
+  delete Ini;
 }
 //---------------------------------------------------------------------------

@@ -1,4 +1,25 @@
 //---------------------------------------------------------------------------
+// Copyright (C) 2012-2013 Krzysztof Grochocki
+//
+// This file is part of ResourcesChanger
+//
+// ResourcesChanger is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3, or (at your option)
+// any later version.
+//
+// ResourcesChanger is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Radio; see the file COPYING. If not, write to
+// the Free Software Foundation, Inc., 51 Franklin Street,
+// Boston, MA 02110-1301, USA.
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
 #ifndef SettingsFrmH
 #define SettingsFrmH
 #define WM_ALPHAWINDOWS (WM_USER + 666)
@@ -21,6 +42,7 @@
 #include <Vcl.Controls.hpp>
 #include <Vcl.ExtCtrls.hpp>
 #include <Vcl.StdCtrls.hpp>
+#include <Vcl.Menus.hpp>
 //---------------------------------------------------------------------------
 class TSettingsForm : public TForm
 {
@@ -48,6 +70,12 @@ __published:	// IDE-managed Components
 	TAction *aResourcesListChk;
 	TAction *aLoadSettings;
 	TAction *aSaveSettings;
+	TPopupMenu *PopupMenu;
+	TMenuItem *ChuckNorrisItem;
+	TMenuItem *N1;
+	TMenuItem *SSIDInfo;
+	TMenuItem *ChangeStateItem;
+	TMenuItem *ChangeStateInfo;
 	void __fastcall FormShow(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall aExitExecute(TObject *Sender);
@@ -60,6 +88,9 @@ __published:	// IDE-managed Components
 	void __fastcall ListViewSelectItem(TObject *Sender, TListItem *Item, bool Selected);
 	void __fastcall SaveButtonClick(TObject *Sender);
 	void __fastcall OKButtonClick(TObject *Sender);
+	void __fastcall ChuckNorrisItemClick(TObject *Sender);
+	void __fastcall PopupMenuPopup(TObject *Sender);
+	void __fastcall ChangeStateItemClick(TObject *Sender);
 
 private:	// User declarations
 public:		// User declarations
