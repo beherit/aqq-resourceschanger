@@ -1,13 +1,36 @@
+//---------------------------------------------------------------------------
+// Copyright (C) 2012-2013 Krzysztof Grochocki
+//
+// This file is part of ResourcesChanger
+//
+// ResourcesChanger is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3, or (at your option)
+// any later version.
+//
+// ResourcesChanger is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GNU Radio; see the file COPYING. If not, write to
+// the Free Software Foundation, Inc., 51 Franklin Street,
+// Boston, MA 02110-1301, USA.
+//---------------------------------------------------------------------------
+
 #include <vcl.h>
 #include <windows.h>
 #pragma hdrstop
 #pragma argsused
+#include <Wlanapi.h>
+#pragma comment(lib, "Wlanapi")
+#include <IdHashMessageDigest.hpp>
 #include <PluginAPI.h>
 #include "FirstRunFrm.h"
 #include "NewComputerFrm.h"
 #include "SettingsFrm.h"
 #define RESOURCESCHANGER_SYSTEM_RESOURCECHANGED L"ResourcesChanger/System/ResourceChanged"
-#include <IdHashMessageDigest.hpp>
 
 int WINAPI DllEntryPoint(HINSTANCE hinst, unsigned long reason, void* lpReserved)
 {
@@ -27,16 +50,25 @@ TPluginInfo PluginInfo;
 UnicodeString SettingsFileDir;
 //Tryb dzialania wtyczki
 int PluginModeChk;
-//Zdefiniowany przez usera zasob
-UnicodeString UserResourceName;
-//Zasob glownego konta Jabber
-UnicodeString DefaultResourceName;
+//Zdefiniowany przez usera zasob dla danego komputera
+UnicodeString ComputerResourceName;
+//Aktulna nazwa zasobu
+UnicodeString ActiveResourceName;
 //Nazwa komputera
 UnicodeString ComputerName;
+//Aktuana nazwa SSID polaczenia Wi-Fi
+UnicodeString ActiveSSID;
+//Uchwyt do okna timera
+HWND hTimerFrm;
+//TIMERY---------------------------------------------------------------------
+#define TIMER_CHKSSID 10
 //FORWARD-AQQ-HOOKS----------------------------------------------------------
 int __stdcall OnModulesLoaded(WPARAM wParam, LPARAM lParam);
+int __stdcall OnSetLastState(WPARAM wParam, LPARAM lParam);
 int __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam);
 int __stdcall ServiceNewComputer(WPARAM, LPARAM);
+//FORWARD-TIMER--------------------------------------------------------------
+LRESULT CALLBACK TimerFrmProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 //FORWARD-OTHER-FUNCTION-----------------------------------------------------
 void LoadSettings();
 void ChangeResources();
@@ -96,49 +128,129 @@ bool ChkThemeGlowing()
 }
 //---------------------------------------------------------------------------
 
-//Pobieranie SSID aktualnego polaczenia Wi-Fi
+//Pobieranie ustawien koloru AlphaControls
+int GetHUE()
+{
+  return (int)PluginLink.CallService(AQQ_SYSTEM_COLORGETHUE,0,0);
+}
+//---------------------------------------------------------------------------
+int GetSaturation()
+{
+  return (int)PluginLink.CallService(AQQ_SYSTEM_COLORGETSATURATION,0,0);
+}
+//---------------------------------------------------------------------------
+
+//Pobieranie aktualnego stanu wskazanego konta
+int GetState()
+{
+  //Pobranie aktualnego stanu konta
+  TPluginStateChange PluginStateChange;
+  PluginLink.CallService(AQQ_FUNCTION_GETNETWORKSTATE,(WPARAM)(&PluginStateChange),0);
+  int State = PluginStateChange.NewState;
+  //Zwrocenie odpowiedniego indeksu
+  return State;
+}
+//---------------------------------------------------------------------------
+
+//Pobieranie sciezki ikony z interfejsu AQQ
+UnicodeString GetIconPath(int Icon)
+{
+  return StringReplace((wchar_t*)PluginLink.CallService(AQQ_FUNCTION_GETPNG_FILEPATH,Icon,0), "\\", "\\\\", TReplaceFlags() << rfReplaceAll);
+}
+//--------------------------------------------------------------------------
+
+//Ustawianie nowego stanu kont
+void SetState(int NewState)
+{
+  if(NewState==0) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aOffline");
+  else if(NewState==1) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aOnline");
+  else if(NewState==2) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aChat");
+  else if(NewState==3) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aAway");
+  else if(NewState==4) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aXA");
+  else if(NewState==5) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aDND");
+  else if(NewState==6) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aInvisible");
+}
+//---------------------------------------------------------------------------
+
+//Pobieranie nazwy SSID aktualnego polaczenia Wi-Fi
 UnicodeString GetNetworkSSID()
 {
+  //Zmienne polaczenia WLAN
   HANDLE ClientHandle = NULL;
-  DWORD ReturnCode = 0;
   DWORD ClientVersion = 2;
   DWORD NegotiatedVersion = 0;
-
-  PWLAN_INTERFACE_INFO_LIST InterfaceList = NULL;
-  PWLAN_INTERFACE_INFO InterfaceInfo = NULL;
-  PWLAN_AVAILABLE_NETWORK_LIST NetworkList = NULL;
-  PWLAN_AVAILABLE_NETWORK NetworkInfo = NULL;
-
-  ReturnCode = WlanOpenHandle(ClientVersion, NULL, &NegotiatedVersion, &ClientHandle);
-  if(ReturnCode!=ERROR_SUCCESS) return "";
-  else
+  //Otwarcie polaczenia WLAN
+  DWORD ReturnCode = WlanOpenHandle(ClientVersion, NULL, &NegotiatedVersion, &ClientHandle);
+  //Polaczenie WLAN otwarte prawidlowo
+  if(ReturnCode==ERROR_SUCCESS)
   {
+	//Enumeracja wszystkich adapterow Wi-Fi
+	PWLAN_INTERFACE_INFO_LIST InterfaceList = NULL;
 	ReturnCode = WlanEnumInterfaces(ClientHandle, NULL, &InterfaceList);
-	if(ReturnCode!=ERROR_SUCCESS) return "";
-	else
+	//Pobrano liste adapterow
+	if(ReturnCode==ERROR_SUCCESS)
 	{
+	  //Przegladanie listy adaperow Wi-F
 	  for(int InterfaceIdx=0; InterfaceIdx<InterfaceList->dwNumberOfItems; InterfaceIdx++)
 	  {
-		InterfaceInfo = (WLAN_INTERFACE_INFO*)&InterfaceList->InterfaceInfo[InterfaceIdx];
+		//Pobranie informacji o adapeterze Wi-Fi
+		PWLAN_INTERFACE_INFO InterfaceInfo = (WLAN_INTERFACE_INFO*)&InterfaceList->InterfaceInfo[InterfaceIdx];
+		//Status adaptera Wi-Fi prawidlowy
 		if(InterfaceInfo->isState==wlan_interface_state_connected)
 		{
+		  //Pobranie wszystkich dostepnych polaczen Wi-Fi
+          PWLAN_AVAILABLE_NETWORK_LIST NetworkList = NULL;
 		  ReturnCode = WlanGetAvailableNetworkList(ClientHandle, &InterfaceInfo->InterfaceGuid, 0, NULL, &NetworkList);
-		  if(ReturnCode!=ERROR_SUCCESS) return "";
-		  else
+		  //Pobrano liste dostepnych polaczen Wi-Fi
+		  if(ReturnCode==ERROR_SUCCESS)
 		  {
+			//Enumeracja wszystkich dostepnych polaczen Wi-Fi
 			for(int NetworkIdx=0; NetworkIdx<NetworkList->dwNumberOfItems; NetworkIdx++)
 			{
-			  NetworkInfo = (WLAN_AVAILABLE_NETWORK *) &NetworkList->Network[NetworkIdx];
+			  //Pobranie informacji o polaczeniu Wi-Fi
+			  PWLAN_AVAILABLE_NETWORK NetworkInfo = (WLAN_AVAILABLE_NETWORK *) &NetworkList->Network[NetworkIdx];
+			  //Adapter Wi-Fi jest polaczony z dana siecia Wi-Fi
 			  if(NetworkInfo->dwFlags & WLAN_AVAILABLE_NETWORK_CONNECTED)
-			   return (UnicodeString)NetworkInfo->strProfileName;
+			  {
+                //Pobranie SSID sieci
+				UnicodeString SSID = (UnicodeString)NetworkInfo->strProfileName;
+				//Zamkniecie polaczenia
+				WlanCloseHandle(ClientHandle,NULL);
+				//Zwrot prawidlowej nazwy SSID
+				return SSID;
+			  }
 			}
 		  }
 		}
 	  }
 	}
   }
-
+  //Zamkniecie polaczenia
+  WlanCloseHandle(ClientHandle,NULL);
+  //Zwrot pustej nazwy SSID
   return "";
+}
+//---------------------------------------------------------------------------
+
+//Procka okna timera
+LRESULT CALLBACK TimerFrmProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+  if(uMsg==WM_TIMER)
+  {
+	//Timer sprawdzajacy aktualnego SSID polaczenia Wi-Fi
+	if(wParam==TIMER_CHKSSID)
+	{
+	  //Pobieranie aktualnego SSID polaczenia Wi-Fi
+	  UnicodeString SSID = GetNetworkSSID();
+	  //SSID polaczenia Wi-Fi sie zmienilo
+	  if(SSID!=ActiveSSID)
+	   ChangeResources();
+	}
+
+	return 0;
+  }
+
+  return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 //---------------------------------------------------------------------------
 
@@ -154,27 +266,52 @@ int __stdcall OnModulesLoaded(WPARAM wParam, LPARAM lParam)
 }
 //---------------------------------------------------------------------------
 
+//Hook na polaczenie sie z siecia przy wlaczeniu AQQ
+int __stdcall OnSetLastState(WPARAM wParam, LPARAM lParam)
+{
+  //Odczyt pliku ustawien
+  TIniFile *Ini = new TIniFile(SettingsFileDir);
+  //Zmiana stanu kont
+  if(Ini->ReadInteger("General","Mode",1)==2)
+  {
+	if(Ini->SectionExists("State:"+ComputerName+":"+GetNetworkSSID()))
+	 SetState(Ini->ReadInteger("State:"+ComputerName+":"+GetNetworkSSID(),"State",0));
+	else if(Ini->SectionExists("State:"+ComputerName))
+	 SetState(Ini->ReadInteger("State:"+ComputerName,"State",0));
+  }
+  //Zamkniecie pliku ustawien
+  delete Ini;
+
+  return 0;
+}
+//---------------------------------------------------------------------------
+
 //Hook na zmianê kompozycji
 int __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam)
 {
-  //Pobieranie sciezki nowej aktywnej kompozycji
-  UnicodeString ThemeDir = StringReplace((wchar_t*)lParam, "\\", "\\\\", TReplaceFlags() << rfReplaceAll);
   //Okno ustawien zostalo juz stworzone
   if(hSettingsForm)
   {
 	//Wlaczona zaawansowana stylizacja okien
 	if(ChkSkinEnabled())
 	{
-	  UnicodeString ThemeSkinDir = GetThemeSkinDir();
+	  //Pobieranie sciezki nowej aktywnej kompozycji
+	  UnicodeString ThemeSkinDir = StringReplace((wchar_t*)lParam, "\\", "\\\\", TReplaceFlags() << rfReplaceAll) + "\\\\Skin";
 	  //Plik zaawansowanej stylizacji okien istnieje
 	  if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
 	  {
+		//Dane pliku zaawansowanej stylizacji okien
 		ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
 		hSettingsForm->sSkinManager->SkinDirectory = ThemeSkinDir;
 		hSettingsForm->sSkinManager->SkinName = "Skin.asz";
+		//Ustawianie animacji AlphaControls
 		if(ChkThemeAnimateWindows()) hSettingsForm->sSkinManager->AnimEffects->FormShow->Time = 200;
 		else hSettingsForm->sSkinManager->AnimEffects->FormShow->Time = 0;
 		hSettingsForm->sSkinManager->Effects->AllowGlowing = ChkThemeGlowing();
+		//Zmiana kolorystyki AlphaControls
+		hSettingsForm->sSkinManager->HueOffset = GetHUE();
+		hSettingsForm->sSkinManager->Saturation = GetSaturation();
+		//Aktywacja skorkowania AlphaControls
 		hSettingsForm->sSkinManager->Active = true;
 	  }
 	  //Brak pliku zaawansowanej stylizacji okien
@@ -189,16 +326,23 @@ int __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam)
 	//Wlaczona zaawansowana stylizacja okien
 	if(ChkSkinEnabled())
 	{
-	  UnicodeString ThemeSkinDir = GetThemeSkinDir();
+	  //Pobieranie sciezki nowej aktywnej kompozycji
+	  UnicodeString ThemeSkinDir = StringReplace((wchar_t*)lParam, "\\", "\\\\", TReplaceFlags() << rfReplaceAll) + "\\\\Skin";
 	  //Plik zaawansowanej stylizacji okien istnieje
 	  if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
 	  {
+		//Dane pliku zaawansowanej stylizacji okien
 		ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
 		hFirstRunForm->sSkinManager->SkinDirectory = ThemeSkinDir;
 		hFirstRunForm->sSkinManager->SkinName = "Skin.asz";
+		//Ustawianie animacji AlphaControls
 		if(ChkThemeAnimateWindows()) hFirstRunForm->sSkinManager->AnimEffects->FormShow->Time = 200;
 		else hFirstRunForm->sSkinManager->AnimEffects->FormShow->Time = 0;
 		hFirstRunForm->sSkinManager->Effects->AllowGlowing = ChkThemeGlowing();
+		//Zmiana kolorystyki AlphaControls
+		hFirstRunForm->sSkinManager->HueOffset = GetHUE();
+		hFirstRunForm->sSkinManager->Saturation = GetSaturation();
+		//Aktywacja skorkowania AlphaControls
 		hFirstRunForm->sSkinManager->Active = true;
 	  }
 	  //Brak pliku zaawansowanej stylizacji okien
@@ -206,19 +350,6 @@ int __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam)
 	}
 	//Zaawansowana stylizacja okien wylaczona
 	else hFirstRunForm->sSkinManager->Active = false;
-	//Skorkowanie poszczegolnych komponentow
-	if(hFirstRunForm->sSkinManager->Active)
-	{
-	  //Kolor WebLabel'ow
-	  hFirstRunForm->WebWelcomeLabel->Font->Color = hFirstRunForm->sSkinManager->GetGlobalFontColor();
-	  hFirstRunForm->WebWelcomeLabel->HoverFont->Color = hFirstRunForm->sSkinManager->GetGlobalFontColor();
-	}
-	else
-	{
-	  //Kolor WebLabel'ow
-	  hFirstRunForm->WebWelcomeLabel->Font->Color = clWindowText;
-	  hFirstRunForm->WebWelcomeLabel->HoverFont->Color = clWindowText;
-	}
   }
   //Okno uzupelniania nazwy zasobu zostalo juz stworzone
   if(hNewComputerForm)
@@ -226,16 +357,23 @@ int __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam)
 	//Wlaczona zaawansowana stylizacja okien
 	if(ChkSkinEnabled())
 	{
-	  UnicodeString ThemeSkinDir = GetThemeSkinDir();
+	  //Pobieranie sciezki nowej aktywnej kompozycji
+	  UnicodeString ThemeSkinDir = StringReplace((wchar_t*)lParam, "\\", "\\\\", TReplaceFlags() << rfReplaceAll) + "\\\\Skin";
 	  //Plik zaawansowanej stylizacji okien istnieje
 	  if(FileExists(ThemeSkinDir + "\\\\Skin.asz"))
 	  {
+		//Dane pliku zaawansowanej stylizacji okien
 		ThemeSkinDir = StringReplace(ThemeSkinDir, "\\\\", "\\", TReplaceFlags() << rfReplaceAll);
 		hNewComputerForm->sSkinManager->SkinDirectory = ThemeSkinDir;
 		hNewComputerForm->sSkinManager->SkinName = "Skin.asz";
+		//Ustawianie animacji AlphaControls
 		if(ChkThemeAnimateWindows()) hNewComputerForm->sSkinManager->AnimEffects->FormShow->Time = 200;
 		else hNewComputerForm->sSkinManager->AnimEffects->FormShow->Time = 0;
 		hNewComputerForm->sSkinManager->Effects->AllowGlowing = ChkThemeGlowing();
+		//Zmiana kolorystyki AlphaControls
+		hNewComputerForm->sSkinManager->HueOffset = GetHUE();
+		hNewComputerForm->sSkinManager->Saturation = GetSaturation();
+		//Aktywacja skorkowania AlphaControls
 		hNewComputerForm->sSkinManager->Active = true;
 	  }
 	  //Brak pliku zaawansowanej stylizacji okien
@@ -275,8 +413,11 @@ void ChangeResources()
   //Tryb prosty
   if(PluginModeChk==1)
   {
-	if(DefaultResourceName!=ComputerName)
+	//Nazwa komputera rozna od aktualnego zasobu
+	if(ComputerName!=ActiveResourceName)
 	{
+	  //Zapamietanie aktualnej-nowej nazwy zasobu
+	  ActiveResourceName = ComputerName;
 	  //Zmiana nazwy zasobu
 	  PluginLink.CallService(AQQ_SYSTEM_CHANGE_JABBERRESOURCES,1,(LPARAM)ComputerName.w_str());
 	  //Wywo³anie notyfikacji RESOURCESCHANGER_SYSTEM_RESOURCECHANGED
@@ -291,19 +432,70 @@ void ChangeResources()
   else if(PluginModeChk==2)
   {
 	//Zasob jest juz zdefiniowany
-	if(!UserResourceName.IsEmpty())
+	if(!ComputerResourceName.IsEmpty())
 	{
-	  if(DefaultResourceName!=UserResourceName)
+	  TIniFile *Ini = new TIniFile(GetPluginUserDir()+"\\\\ResourcesChanger\\\\Settings.ini");
+	  //Tryb Chucka Norrisa
+	  if(Ini->SectionExists("SSID:"+ComputerName))
 	  {
-		//Zmiana nazwy zasobu
-		PluginLink.CallService(AQQ_SYSTEM_CHANGE_JABBERRESOURCES,1,(LPARAM)UserResourceName.w_str());
-		//Wywo³anie notyfikacji RESOURCESCHANGER_SYSTEM_RESOURCECHANGED
-		TPluginHook PluginHook;
-		PluginHook.HookName = RESOURCESCHANGER_SYSTEM_RESOURCECHANGED;
-		PluginHook.wParam = 0;
-		PluginHook.lParam = (LPARAM)UserResourceName.w_str();
-		PluginLink.CallService(AQQ_SYSTEM_SENDHOOK,(WPARAM)(&PluginHook),0);
+		//Pobieranie nazwy zasobu na baziego aktualnego SSID sieci Wi-Fi
+		UnicodeString SSIDResourceName = Ini->ReadString("SSID:"+ComputerName,GetNetworkSSID(),"");
+		//Zdefiniowano nazwe zasobu dla aktualnego SSID sieci Wi-Fi
+		if(!SSIDResourceName.IsEmpty())
+		{
+		  //Zdefiniowany zasob dla aktualnego SSID sieci Wi-Fi rozny od aktualnego zasobu
+		  if(SSIDResourceName!=ActiveResourceName)
+		  {
+			//Zapamietanie aktualnej-nowej nazwy zasobu
+			ActiveResourceName = SSIDResourceName;
+			//Zmiana nazwy zasobu
+			PluginLink.CallService(AQQ_SYSTEM_CHANGE_JABBERRESOURCES,1,(LPARAM)SSIDResourceName.w_str());
+			//Wywo³anie notyfikacji RESOURCESCHANGER_SYSTEM_RESOURCECHANGED
+			TPluginHook PluginHook;
+			PluginHook.HookName = RESOURCESCHANGER_SYSTEM_RESOURCECHANGED;
+			PluginHook.wParam = 0;
+			PluginHook.lParam = (LPARAM)SSIDResourceName.w_str();
+	  		PluginLink.CallService(AQQ_SYSTEM_SENDHOOK,(WPARAM)(&PluginHook),0);
+		  }
+		}
+		//Nazwa zasobu dla aktualnego SSID sieci Wi-Fi nie zostala zdefiniowana
+		else
+		{
+		  //Zdefiniowany zasob dla nazwy komputera rozny od aktualnego zasobu
+		  if(ComputerResourceName!=ActiveResourceName)
+		  {
+			//Zapamietanie aktualnej-nowej nazwy zasobu
+			ActiveResourceName = ComputerResourceName;
+			//Zmiana nazwy zasobu
+			PluginLink.CallService(AQQ_SYSTEM_CHANGE_JABBERRESOURCES,1,(LPARAM)ComputerResourceName.w_str());
+			//Wywo³anie notyfikacji RESOURCESCHANGER_SYSTEM_RESOURCECHANGED
+			TPluginHook PluginHook;
+			PluginHook.HookName = RESOURCESCHANGER_SYSTEM_RESOURCECHANGED;
+			PluginHook.wParam = 0;
+			PluginHook.lParam = (LPARAM)ComputerResourceName.w_str();
+			PluginLink.CallService(AQQ_SYSTEM_SENDHOOK,(WPARAM)(&PluginHook),0);
+		  }
+        }
 	  }
+	  //Zwykly tryb zaawansowany
+	  else
+	  {
+		//Zdefiniowany zasob dla nazwy komputera rozny od aktualnego
+		if(ComputerResourceName!=ActiveResourceName)
+		{
+		  //Zapamietanie aktualnej-nowej nazwy zasobu
+		  ActiveResourceName = ComputerResourceName;
+		  //Zmiana nazwy zasobu
+		  PluginLink.CallService(AQQ_SYSTEM_CHANGE_JABBERRESOURCES,1,(LPARAM)ComputerResourceName.w_str());
+		  //Wywo³anie notyfikacji RESOURCESCHANGER_SYSTEM_RESOURCECHANGED
+		  TPluginHook PluginHook;
+		  PluginHook.HookName = RESOURCESCHANGER_SYSTEM_RESOURCECHANGED;
+		  PluginHook.wParam = 0;
+		  PluginHook.lParam = (LPARAM)ComputerResourceName.w_str();
+		  PluginLink.CallService(AQQ_SYSTEM_SENDHOOK,(WPARAM)(&PluginHook),0);
+		}
+	  }
+	  delete Ini;
 	}
 	//Zasob nie zostal jeszcze zdefiniowany
 	else
@@ -383,11 +575,17 @@ UnicodeString MD5File(UnicodeString FileName)
 //Odczyt ustawien wtyczki
 void LoadSettings()
 {
+  //Wylaczenie timera
+  KillTimer(hTimerFrm,TIMER_CHKSSID);
+  //Odczyt ustawien
   TIniFile *Ini = new TIniFile(SettingsFileDir);
   //Tryb dzialania
   PluginModeChk = Ini->ReadInteger("General","Mode",1);
+  //Wlaczenie timera
+  if(PluginModeChk==2) SetTimer(hTimerFrm,TIMER_CHKSSID,60000,(TIMERPROC)TimerFrmProc);
   //Zdefiniowany przez usera zasob
-  UserResourceName = Ini->ReadString("Resources",ComputerName,"");
+  ComputerResourceName = Ini->ReadString("Resources",ComputerName,"");
+  //
   delete Ini;
 }
 //---------------------------------------------------------------------------
@@ -413,7 +611,7 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   //Pobieranie zasobu glownego konta Jabber
   TPluginStateChange PluginStateChange;
   PluginLink.CallService(AQQ_FUNCTION_GETNETWORKSTATE,(WPARAM)(&PluginStateChange),0);
-  DefaultResourceName = (wchar_t*)PluginStateChange.Resource;
+  ActiveResourceName = (wchar_t*)PluginStateChange.Resource;
   //Pobieranie nazwy komputera
   wchar_t compName[256];
   DWORD len = sizeof(compName);
@@ -421,6 +619,25 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
   ComputerName = compName;
   //Tworzenie serwisu do uzupelniania zasobu nowego komputera
   PluginLink.CreateServiceFunction(L"sResourcesChangerNewComputer",ServiceNewComputer);
+  //Rejestowanie klasy okna timera
+  WNDCLASSEX wincl;
+  wincl.cbSize = sizeof (WNDCLASSEX);
+  wincl.style = 0;
+  wincl.lpfnWndProc = TimerFrmProc;
+  wincl.cbClsExtra = 0;
+  wincl.cbWndExtra = 0;
+  wincl.hInstance = HInstance;
+  wincl.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+  wincl.hCursor = LoadCursor(NULL, IDC_ARROW);
+  wincl.hbrBackground = (HBRUSH)COLOR_BACKGROUND;
+  wincl.lpszMenuName = NULL;
+  wincl.lpszClassName = L"TResourcesChangerTimer";
+  wincl.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+  RegisterClassEx(&wincl);
+  //Tworzenie okna timera
+  hTimerFrm = CreateWindowEx(0, L"TResourcesChangerTimer", L"",	0, 0, 0, 0, 0, NULL, NULL, HInstance, NULL);
+  //Hook na polaczenie sie z siecia przy wlaczeniu AQQ
+  PluginLink.HookEvent(AQQ_SYSTEM_SETLASTSTATE,OnSetLastState);
   //Hook na zmianê kompozycji
   PluginLink.HookEvent(AQQ_SYSTEM_THEMECHANGED,OnThemeChanged);
   //Hook na zaladowanie wszystkich modulow w AQQ
@@ -462,8 +679,15 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 //Wyladowanie wtyczki
 extern "C" int __declspec(dllexport) __stdcall Unload()
 {
+  //Wyladowanie timerow
+  KillTimer(hTimerFrm,TIMER_CHKSSID);
+  //Usuwanie okna timera
+  DestroyWindow(hTimerFrm);
+  //Wyrejestowanie klasy okna timera
+  UnregisterClass(L"TResourcesChangerTimer",HInstance);
   //Wyladowanie wszystkich hookow
   PluginLink.UnhookEvent(OnModulesLoaded);
+  PluginLink.UnhookEvent(OnSetLastState);
   PluginLink.UnhookEvent(OnThemeChanged);
   //Usuwanie serwisu do uzupelniania zasobu nowego komputera
   PluginLink.DestroyServiceFunction(ServiceNewComputer);
@@ -493,8 +717,8 @@ extern "C" PPluginInfo __declspec(dllexport) __stdcall AQQPluginInfo(DWORD AQQVe
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"ResourcesChanger";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,2,0,0);
-  PluginInfo.Description = L"Zmienia nazwê zasobu we wszystkich kontach Jabber zale¿nie od nazwy naszego komputera.";
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,3,0,0);
+  PluginInfo.Description = L"Zmienia nazwê zasobu we wszystkich kontach Jabber zale¿nie od nazwy naszego komputera oraz innych danych (np. nazwy aktywnego po³¹czenia Wi-Fi).";
   PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";
   PluginInfo.Copyright = L"Krzysztof Grochocki (Beherit)";
