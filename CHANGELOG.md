@@ -1,3 +1,9 @@
+1.3.1.0
+-----
+* Wersja 64-bitowa jest wreszcie prawid³owo skórkowana.
+* Kompilacja pod poprawionymi nag³ówkami dla wersji 64-bitowej.
+* Aktualizacja komponentów AlphaControls do nowszej wersji (8.46).
+
 1.3.0.0
 -----
 * Mo¿liwoœæ zdefiniowania nazwy zasobu na podstawie nazwy SSID po³¹czenia Wi-Fi (PPM na nazwie komputera).
