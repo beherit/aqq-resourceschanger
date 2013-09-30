@@ -63,10 +63,10 @@ HWND hTimerFrm;
 //TIMERY---------------------------------------------------------------------
 #define TIMER_CHKSSID 10
 //FORWARD-AQQ-HOOKS----------------------------------------------------------
-int __stdcall OnModulesLoaded(WPARAM wParam, LPARAM lParam);
-int __stdcall OnSetLastState(WPARAM wParam, LPARAM lParam);
-int __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam);
-int __stdcall ServiceNewComputer(WPARAM, LPARAM);
+INT_PTR __stdcall OnModulesLoaded(WPARAM wParam, LPARAM lParam);
+INT_PTR __stdcall OnSetLastState(WPARAM wParam, LPARAM lParam);
+INT_PTR __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam);
+INT_PTR __stdcall ServiceNewComputer(WPARAM, LPARAM);
 //FORWARD-TIMER--------------------------------------------------------------
 LRESULT CALLBACK TimerFrmProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 //FORWARD-OTHER-FUNCTION-----------------------------------------------------
@@ -255,7 +255,7 @@ LRESULT CALLBACK TimerFrmProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 //---------------------------------------------------------------------------
 
 //Hook na zaladowanie wszystkich modulow w AQQ
-int __stdcall OnModulesLoaded(WPARAM wParam, LPARAM lParam)
+INT_PTR __stdcall OnModulesLoaded(WPARAM wParam, LPARAM lParam)
 {
   //Odczyt ustawien w rdzeniu wtyczki
   LoadSettings();
@@ -267,7 +267,7 @@ int __stdcall OnModulesLoaded(WPARAM wParam, LPARAM lParam)
 //---------------------------------------------------------------------------
 
 //Hook na polaczenie sie z siecia przy wlaczeniu AQQ
-int __stdcall OnSetLastState(WPARAM wParam, LPARAM lParam)
+INT_PTR __stdcall OnSetLastState(WPARAM wParam, LPARAM lParam)
 {
   //Odczyt pliku ustawien
   TIniFile *Ini = new TIniFile(SettingsFileDir);
@@ -287,7 +287,7 @@ int __stdcall OnSetLastState(WPARAM wParam, LPARAM lParam)
 //---------------------------------------------------------------------------
 
 //Hook na zmianê kompozycji
-int __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam)
+INT_PTR __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam)
 {
   //Okno ustawien zostalo juz stworzone
   if(hSettingsForm)
@@ -387,7 +387,7 @@ int __stdcall OnThemeChanged(WPARAM wParam, LPARAM lParam)
 }
 //---------------------------------------------------------------------------
 
-int __stdcall ServiceNewComputer(WPARAM, LPARAM)
+INT_PTR __stdcall ServiceNewComputer(WPARAM, LPARAM)
 {
   //Przypisanie uchwytu do formy pierwszego uruchomienia
   if(!hFirstRunForm)
@@ -591,7 +591,7 @@ void LoadSettings()
 //---------------------------------------------------------------------------
 
 //Zaladowanie wtyczki
-extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
+extern "C" INT_PTR __declspec(dllexport) __stdcall Load(PPluginLink Link)
 {
   //Linkowanie wtyczki z komunikatorem
   PluginLink = *Link;
@@ -677,7 +677,7 @@ extern "C" int __declspec(dllexport) __stdcall Load(PPluginLink Link)
 //---------------------------------------------------------------------------
 
 //Wyladowanie wtyczki
-extern "C" int __declspec(dllexport) __stdcall Unload()
+extern "C" INT_PTR __declspec(dllexport) __stdcall Unload()
 {
   //Wyladowanie timerow
   KillTimer(hTimerFrm,TIMER_CHKSSID);
@@ -697,7 +697,7 @@ extern "C" int __declspec(dllexport) __stdcall Unload()
 //---------------------------------------------------------------------------
 
 //Ustawienia wtyczki
-extern "C" int __declspec(dllexport)__stdcall Settings()
+extern "C" INT_PTR __declspec(dllexport)__stdcall Settings()
 {
   //Przypisanie uchwytu do formy ustawien
   if(!hSettingsForm)
@@ -717,7 +717,7 @@ extern "C" PPluginInfo __declspec(dllexport) __stdcall AQQPluginInfo(DWORD AQQVe
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"ResourcesChanger";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,3,0,0);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,3,1,0);
   PluginInfo.Description = L"Zmienia nazwê zasobu we wszystkich kontach Jabber zale¿nie od nazwy naszego komputera oraz innych danych (np. nazwy aktywnego po³¹czenia Wi-Fi).";
   PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";

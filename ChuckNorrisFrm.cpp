@@ -57,15 +57,6 @@ void __fastcall TChuckNorrisForm::WMTransparency(TMessage &Message)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TChuckNorrisForm::FormCreate(TObject *Sender)
-{
-  //Hack na blad w AC
-  #if defined(_WIN64)
-  ListView->SkinData->SkinSection = "";
-  #endif
-}
-//---------------------------------------------------------------------------
-
 void __fastcall TChuckNorrisForm::FormShow(TObject *Sender)
 {
   //Odczyt ustawien wtyczki

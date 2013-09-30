@@ -77,7 +77,6 @@ __published:	// IDE-managed Components
 	void __fastcall ListViewSelectItem(TObject *Sender, TListItem *Item, bool Selected);
 	void __fastcall PopupMenu2Popup(TObject *Sender);
 	void __fastcall ChangeStateItemClick(TObject *Sender);
-	void __fastcall FormCreate(TObject *Sender);
 
 private:	// User declarations
 public:		// User declarations

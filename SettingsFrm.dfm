@@ -212,6 +212,10 @@ object SettingsForm: TSettingsForm
       Caption = 'Tryb dzia'#322'ania'
       SkinData.CustomColor = False
       SkinData.CustomFont = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object AdvancedModeLabel: TsLabel
         Left = 35
         Top = 74
@@ -259,6 +263,10 @@ object SettingsForm: TSettingsForm
       Caption = 'Lista zasob'#243'w'
       SkinData.CustomColor = False
       SkinData.CustomFont = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object DeleteItemSpeedButton: TsSpeedButton
         Left = 243
         Top = 96
@@ -463,6 +471,7 @@ object SettingsForm: TSettingsForm
   end
   object sSkinManager: TsSkinManager
     ExtendedBorders = True
+    IsDefault = False
     Active = False
     InternalSkins = <>
     MenuSupport.IcoLineSkin = 'ICOLINE'
