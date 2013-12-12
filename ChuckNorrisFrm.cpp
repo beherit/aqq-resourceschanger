@@ -187,9 +187,18 @@ void __fastcall TChuckNorrisForm::SaveButtonClick(TObject *Sender)
 
 void __fastcall TChuckNorrisForm::PopupMenu2Popup(TObject *Sender)
 {
-  TIniFile *Ini = new TIniFile(GetPluginUserDir()+"\\\\ResourcesChanger\\\\Settings.ini");
-  ChangeStateItem->Checked = Ini->SectionExists("State:"+ComputerName+":"+ListView->Items->Item[ListView->ItemIndex]->Caption);
-  delete Ini;
+  if(ListView->ItemIndex!=-1)
+  {
+	TIniFile *Ini = new TIniFile(GetPluginUserDir()+"\\\\ResourcesChanger\\\\Settings.ini");
+	ChangeStateItem->Enabled = true;
+	ChangeStateItem->Checked = Ini->SectionExists("State:"+ComputerName+":"+ListView->Items->Item[ListView->ItemIndex]->Caption);
+	delete Ini;
+  }
+  else
+  {
+	ChangeStateItem->Enabled = false;
+	ChangeStateItem->Checked = false;
+  }
 }
 //---------------------------------------------------------------------------
 

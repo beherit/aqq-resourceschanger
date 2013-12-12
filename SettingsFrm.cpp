@@ -288,9 +288,21 @@ void __fastcall TSettingsForm::ChangeStateItemClick(TObject *Sender)
 
 void __fastcall TSettingsForm::PopupMenuPopup(TObject *Sender)
 {
-  TIniFile *Ini = new TIniFile(GetPluginUserDir()+"\\\\ResourcesChanger\\\\Settings.ini");
-  ChuckNorrisItem->Checked = Ini->SectionExists("SSID:"+ListView->Items->Item[ListView->ItemIndex]->Caption);
-  ChangeStateItem->Checked = Ini->SectionExists("State:"+ListView->Items->Item[ListView->ItemIndex]->Caption);
-  delete Ini;
+  if(ListView->ItemIndex!=-1)
+  {
+	TIniFile *Ini = new TIniFile(GetPluginUserDir()+"\\\\ResourcesChanger\\\\Settings.ini");
+	ChuckNorrisItem->Enabled = true;
+	ChuckNorrisItem->Checked = Ini->SectionExists("SSID:"+ListView->Items->Item[ListView->ItemIndex]->Caption);
+	ChangeStateItem->Enabled = true;
+	ChangeStateItem->Checked = Ini->SectionExists("State:"+ListView->Items->Item[ListView->ItemIndex]->Caption);
+	delete Ini;
+  }
+  else
+  {
+	ChuckNorrisItem->Enabled = false;
+	ChuckNorrisItem->Checked = false;
+	ChangeStateItem->Enabled = false;
+	ChangeStateItem->Checked = false;
+  }
 }
 //---------------------------------------------------------------------------
