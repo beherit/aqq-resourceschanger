@@ -1,3 +1,9 @@
+1.3.2.0
+-----
+* Usuniêcie drobnego b³êdu AV z formy ustawieñ.
+* Zmniejszenie rozmiaru wtyczki 64-bitowej poprzez u¿ycie kompresji LZMA.
+* Aktualizacja komponentów AlphaControls do nowszej wersji (8.51).
+
 1.3.1.0
 -----
 * Wersja 64-bitowa jest wreszcie prawid³owo skórkowana.
