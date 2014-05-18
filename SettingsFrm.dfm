@@ -212,6 +212,10 @@ object SettingsForm: TSettingsForm
       Caption = 'Tryb dzia'#322'ania'
       SkinData.CustomColor = False
       SkinData.CustomFont = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object AdvancedModeLabel: TsLabel
         Left = 35
         Top = 74

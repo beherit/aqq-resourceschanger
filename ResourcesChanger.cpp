@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-// Copyright (C) 2012-2013 Krzysztof Grochocki
+// Copyright (C) 2012-2014 Krzysztof Grochocki
 //
 // This file is part of ResourcesChanger
 //
@@ -162,13 +162,13 @@ UnicodeString GetIconPath(int Icon)
 //Ustawianie nowego stanu kont
 void SetState(int NewState)
 {
-  if(NewState==0) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aOffline");
-  else if(NewState==1) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aOnline");
-  else if(NewState==2) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aChat");
-  else if(NewState==3) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aAway");
-  else if(NewState==4) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aXA");
-  else if(NewState==5) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aDND");
-  else if(NewState==6) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aInvisible");
+  if(NewState==0) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aMacroOffline");
+  else if(NewState==1) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aMacroOnline");
+  else if(NewState==2) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aMacroChat");
+  else if(NewState==3) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aMacroAway");
+  else if(NewState==4) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aMacroXA");
+  else if(NewState==5) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aMacroDND");
+  else if(NewState==6) PluginLink.CallService(AQQ_SYSTEM_RUNACTION,0,(LPARAM)L"aMacroInvisible");
 }
 //---------------------------------------------------------------------------
 
@@ -237,7 +237,7 @@ LRESULT CALLBACK TimerFrmProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 {
   if(uMsg==WM_TIMER)
   {
-	//Timer sprawdzajacy aktualnego SSID polaczenia Wi-Fi
+	//Sprawdzanie aktualnego SSID polaczenia Wi-Fi
 	if(wParam==TIMER_CHKSSID)
 	{
 	  //Pobieranie aktualnego SSID polaczenia Wi-Fi
@@ -717,11 +717,11 @@ extern "C" PPluginInfo __declspec(dllexport) __stdcall AQQPluginInfo(DWORD AQQVe
 {
   PluginInfo.cbSize = sizeof(TPluginInfo);
   PluginInfo.ShortName = L"ResourcesChanger";
-  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,3,2,0);
+  PluginInfo.Version = PLUGIN_MAKE_VERSION(1,3,3,0);
   PluginInfo.Description = L"Zmienia nazwê zasobu we wszystkich kontach Jabber zale¿nie od nazwy naszego komputera oraz innych danych (np. nazwy aktywnego po³¹czenia Wi-Fi).";
-  PluginInfo.Author = L"Krzysztof Grochocki (Beherit)";
+  PluginInfo.Author = L"Krzysztof Grochocki";
   PluginInfo.AuthorMail = L"kontakt@beherit.pl";
-  PluginInfo.Copyright = L"Krzysztof Grochocki (Beherit)";
+  PluginInfo.Copyright = L"Krzysztof Grochocki";
   PluginInfo.Homepage = L"http://beherit.pl";
 
   return &PluginInfo;

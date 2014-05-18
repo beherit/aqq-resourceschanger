@@ -8,14 +8,14 @@ Znalezione błędy wtyczki należy zgłaszać na [tracekerze](http://forum.aqq.e
 
 Kontakt z autorem
 -------
-Autorem wtyczki ResourcesChanger jest Krzysztof Grochocki. Możesz skontaktować się z nim drogą mailową (kontakt@beherit.pl) lub poprzez Jabber (beherit@aqq.eu).
+Autorem wtyczki ResourcesChanger jest Krzysztof Grochocki. Możesz skontaktować się z nim drogą mailową (kontakt@beherit.pl) lub poprzez Jabber (im@beherit.pl).
 
 Licencja
 -------
 Wtyczka ResourcesChanger objęta jest licencją [GNU General Public License 3](http://www.gnu.org/copyleft/gpl.html).
 
     ResourcesChanger
-    Copyright (C) 2012-2013  Krzysztof Grochocki
+    Copyright (C) 2012-2014  Krzysztof Grochocki
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
