@@ -1,37 +1,42 @@
+1.3.3.0
+-----
+* Poprawne zmienianie stanu wszystkich kont.
+* Aktualizacja komponent√≥w AlphaControls do nowszej wersji (8.53).
+
 1.3.2.0
 -----
-* UsuniÍcie drobnego b≥Ídu AV z formy ustawieÒ.
-* Zmniejszenie rozmiaru wtyczki 64-bitowej poprzez uøycie kompresji LZMA.
-* Aktualizacja komponentÛw AlphaControls do nowszej wersji (8.51).
+* Usuniƒôcie drobnego b≈Çƒôdu AV z formy ustawie≈Ñ.
+* Zmniejszenie rozmiaru wtyczki 64-bitowej poprzez u≈ºycie kompresji LZMA.
+* Aktualizacja komponent√≥w AlphaControls do nowszej wersji (8.51).
 
 1.3.1.0
 -----
-* Wersja 64-bitowa jest wreszcie prawid≥owo skÛrkowana.
-* Kompilacja pod poprawionymi nag≥Ûwkami dla wersji 64-bitowej.
-* Aktualizacja komponentÛw AlphaControls do nowszej wersji (8.46).
+* Wersja 64-bitowa jest wreszcie prawid≈Çowo sk√≥rkowana.
+* Kompilacja pod poprawionymi nag≈Ç√≥wkami dla wersji 64-bitowej.
+* Aktualizacja komponent√≥w AlphaControls do nowszej wersji (8.46).
 
 1.3.0.0
 -----
-* MoøliwoúÊ zdefiniowania nazwy zasobu na podstawie nazwy SSID po≥πczenia Wi-Fi (PPM na nazwie komputera).
-* MoøliwoúÊ ustawienia domyúlnego stanu sieci dla danego zasobu (PPM na nazwie komputera/zasobu).
-* Obs≥uga kolorystyki stylizacji okien (barwa i nasycenie).
-* Drobna poprawka w obs≥udze nadawania przeüroczystoúci obramowaÒ przez wtyczkÍ AlphaWindows.
-* Ma≥e kosmetyczne zmiany na formach.
-* Aktualizacja komponentÛw AlphaControls do nowszej wersji (8.45).
+* Mo≈ºliwo≈õƒá zdefiniowania nazwy zasobu na podstawie nazwy SSID po≈ÇƒÖczenia Wi-Fi (PPM na nazwie komputera).
+* Mo≈ºliwo≈õƒá ustawienia domy≈õlnego stanu sieci dla danego zasobu (PPM na nazwie komputera/zasobu).
+* Obs≈Çuga kolorystyki stylizacji okien (barwa i nasycenie).
+* Drobna poprawka w obs≈Çudze nadawania prze≈∫roczysto≈õci obramowa≈Ñ przez wtyczkƒô AlphaWindows.
+* Ma≈Çe kosmetyczne zmiany na formach.
+* Aktualizacja komponent√≥w AlphaControls do nowszej wersji (8.45).
 
 1.2.0.0
 -----
 * Dodanie 64-bitowej wersji wtyczki.
-* Wsparcie dla wtyczki AlphaWindows (ustawianie przeüroczystoúci obramowania).
-* Zmniejszenie rozmiaru wtyczki 32-bitowej poprzez uøycie kompresji LZMA.
-* Drobne zmiany w skÛrkowaniu form.
-* Aktualizacja komponentÛw AlphaControls do nowszej wersji (8.20).
-* Inne mniej waøne zmiany w kodzie.
+* Wsparcie dla wtyczki AlphaWindows (ustawianie prze≈∫roczysto≈õci obramowania).
+* Zmniejszenie rozmiaru wtyczki 32-bitowej poprzez u≈ºycie kompresji LZMA.
+* Drobne zmiany w sk√≥rkowaniu form.
+* Aktualizacja komponent√≥w AlphaControls do nowszej wersji (8.20).
+* Inne mniej wa≈ºne zmiany w kodzie.
 
 1.1.0.0
 -----
 * Przepisanie wtyczki pod kompilator Embarcadero C++ Builder XE3.
-* Aktualizacja komponentÛw AlphaControls do najnowszej dostÍpnej wersji (7.70).
+* Aktualizacja komponent√≥w AlphaControls do najnowszej dostƒôpnej wersji (7.70).
 
 1.0.0.0
 -----

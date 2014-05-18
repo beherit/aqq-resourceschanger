@@ -212,6 +212,7 @@ object SetStateForm: TSetStateForm
     BoundLabel.MaxWidth = 0
     BoundLabel.UseSkinColor = True
     SkinData.SkinSection = 'COMBOBOX'
+    VerticalAlignment = taAlignTop
     Style = csOwnerDrawFixed
     ItemHeight = 21
     ItemIndex = -1
