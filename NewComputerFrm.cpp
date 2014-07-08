@@ -119,3 +119,9 @@ void __fastcall TNewComputerForm::aExitExecute(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TNewComputerForm::sSkinManagerSysDlgInit(TacSysDlgData DlgData, bool &AllowSkinning)
+{
+  AllowSkinning = false;
+}
+//---------------------------------------------------------------------------
+

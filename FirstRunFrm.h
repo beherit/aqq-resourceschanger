@@ -93,7 +93,7 @@ __published:	// IDE-managed Components
 	void __fastcall ListViewSelectItem(TObject *Sender, TListItem *Item, bool Selected);
 	void __fastcall aSaveSettingsExecute(TObject *Sender);
 	void __fastcall SaveButtonClick(TObject *Sender);
-
+	void __fastcall sSkinManagerSysDlgInit(TacSysDlgData DlgData, bool &AllowSkinning);
 private:	// User declarations
 public:		// User declarations
 	UnicodeString pComputerName;

@@ -54,6 +54,7 @@ __published:	// IDE-managed Components
 	void __fastcall NewUserResourceNameEditChange(TObject *Sender);
 	void __fastcall SaveButtonClick(TObject *Sender);
 	void __fastcall aExitExecute(TObject *Sender);
+	void __fastcall sSkinManagerSysDlgInit(TacSysDlgData DlgData, bool &AllowSkinning);
 private:	// User declarations
 public:		// User declarations
 	UnicodeString pComputerName;
