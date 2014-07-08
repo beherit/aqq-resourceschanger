@@ -1,3 +1,8 @@
+1.3.4.0
+-----
+* Nieskórkowanie systemowych okien dialogowych niepochodzących z wtyczki.
+* Aktualizacja komponentów AlphaControls do nowszej wersji (9.10).
+
 1.3.3.0
 -----
 * Poprawne zmienianie stanu wszystkich kont.

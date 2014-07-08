@@ -286,3 +286,9 @@ void __fastcall TFirstRunForm::SaveButtonClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TFirstRunForm::sSkinManagerSysDlgInit(TacSysDlgData DlgData, bool &AllowSkinning)
+{
+  AllowSkinning = false;
+}
+//---------------------------------------------------------------------------
+

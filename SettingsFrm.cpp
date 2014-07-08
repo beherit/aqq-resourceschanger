@@ -306,3 +306,10 @@ void __fastcall TSettingsForm::PopupMenuPopup(TObject *Sender)
   }
 }
 //---------------------------------------------------------------------------
+
+void __fastcall TSettingsForm::sSkinManagerSysDlgInit(TacSysDlgData DlgData, bool &AllowSkinning)
+{
+  AllowSkinning = false;
+}
+//---------------------------------------------------------------------------
+

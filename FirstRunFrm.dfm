@@ -193,7 +193,7 @@ object FirstRunForm: TFirstRunForm
       WordWrap = True
       OnClick = aModeChkExecute
       AutoSize = False
-      SkinData.SkinSection = 'RADIOBUTTON'
+      SkinData.SkinSection = 'TRANSPARENT'
     end
     object ComputerNameEdit: TsEdit
       Left = 130
@@ -228,7 +228,7 @@ object FirstRunForm: TFirstRunForm
       WordWrap = True
       OnClick = aModeChkExecute
       AutoSize = False
-      SkinData.SkinSection = 'RADIOBUTTON'
+      SkinData.SkinSection = 'TRANSPARENT'
     end
   end
   object Panel3: TsPanel
@@ -2262,6 +2262,7 @@ object FirstRunForm: TFirstRunForm
     MenuSupport.ExtraLineFont.Height = -11
     MenuSupport.ExtraLineFont.Name = 'Tahoma'
     MenuSupport.ExtraLineFont.Style = []
+    Options.OptimizingPriority = opMemory
     SkinDirectory = 'c:\Skins'
     SkinInfo = 'N/A'
     ThirdParty.ThirdEdits = ' '
@@ -2286,6 +2287,8 @@ object FirstRunForm: TFirstRunForm
     ThirdParty.ThirdUpDown = ' '
     ThirdParty.ThirdScrollBar = ' '
     ThirdParty.ThirdStaticText = ' '
+    ThirdParty.ThirdNativePaint = ' '
+    OnSysDlgInit = sSkinManagerSysDlgInit
     Left = 72
     Top = 144
   end

@@ -212,10 +212,6 @@ object SettingsForm: TSettingsForm
       Caption = 'Tryb dzia'#322'ania'
       SkinData.CustomColor = False
       SkinData.CustomFont = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object AdvancedModeLabel: TsLabel
         Left = 35
         Top = 74
@@ -240,7 +236,7 @@ object SettingsForm: TSettingsForm
         WordWrap = True
         OnClick = aResourcesListChkExecute
         AutoSize = False
-        SkinData.SkinSection = 'RADIOBUTTON'
+        SkinData.SkinSection = 'TRANSPARENT'
       end
       object SimpleModeRadioButton: TsRadioButton
         Left = 12
@@ -256,7 +252,7 @@ object SettingsForm: TSettingsForm
         WordWrap = True
         OnClick = aResourcesListChkExecute
         AutoSize = False
-        SkinData.SkinSection = 'RADIOBUTTON'
+        SkinData.SkinSection = 'TRANSPARENT'
       end
     end
     object ResourcesListTabSheet: TsTabSheet
@@ -480,6 +476,7 @@ object SettingsForm: TSettingsForm
     MenuSupport.ExtraLineFont.Height = -11
     MenuSupport.ExtraLineFont.Name = 'Tahoma'
     MenuSupport.ExtraLineFont.Style = []
+    Options.OptimizingPriority = opMemory
     SkinDirectory = 'c:\Skins'
     SkinInfo = 'N/A'
     ThirdParty.ThirdEdits = ' '
@@ -504,6 +501,8 @@ object SettingsForm: TSettingsForm
     ThirdParty.ThirdUpDown = ' '
     ThirdParty.ThirdScrollBar = ' '
     ThirdParty.ThirdStaticText = ' '
+    ThirdParty.ThirdNativePaint = ' '
+    OnSysDlgInit = sSkinManagerSysDlgInit
     Left = 232
     Top = 168
   end
