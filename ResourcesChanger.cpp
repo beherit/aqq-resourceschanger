@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-// Copyright (C) 2012-2015 Krzysztof Grochocki
+// Copyright (C) 2012-2016 Krzysztof Grochocki
 //
 // This file is part of ResourcesChanger
 //
@@ -718,9 +718,9 @@ extern "C" PPluginInfo __declspec(dllexport) __stdcall AQQPluginInfo(DWORD AQQVe
   PluginInfo.Version = PLUGIN_MAKE_VERSION(1,3,4,0);
   PluginInfo.Description = L"Zmienia nazwê zasobu we wszystkich kontach Jabber zale¿nie od nazwy naszego komputera oraz innych danych (np. nazwy aktywnego po³¹czenia Wi-Fi).";
   PluginInfo.Author = L"Krzysztof Grochocki";
-  PluginInfo.AuthorMail = L"kontakt@beherit.pl";
+  PluginInfo.AuthorMail = L"contact@beherit.pl";
   PluginInfo.Copyright = L"Krzysztof Grochocki";
-  PluginInfo.Homepage = L"http://beherit.pl";
+  PluginInfo.Homepage = L"beherit.pl";
 
   return &PluginInfo;
 }
